@@ -1,48 +1,100 @@
-var buttonColors = ["green", "red", "yellow", "blue"];
+let buttonColors = ["green", "red", "yellow", "blue"];
 var gamePattern = [];
 var userClickedPattern = [];
 var score = 0;
+var gameOverFlag = 0;
 
 ////////////////// MAIN //////////////////
 
-// add click event listeners to all buttons
-$("button").on("click", function(event) {
-  // console.log(event.target.id);
-
-  // animate the button click
-  animateButtonClick(event.target.id);
-
-  // add the clicked button the the user's pattern
-  userClickedPattern.push(event.target.id);
-
-  // compare the current pattern against the game pattern --> game over if
-  // mismatch
-  for (var i=0; i<userClickedPattern.length; ++i) {
-    if (userClickedPattern[i] !== gamePattern[i]) gameOver();
-  }
-
-  // if user pattern length is the same as the game pattern length, reset user
-  // pattern, increment score, and generate and show the next pattern
-  if (userClickedPattern.length === gamePattern.length) {
-    userClickedPattern = [];
-    ++score;
-    nextSequence();
-    showSequence();
-  }
-});
-
-// start the game upon keypress
-$(document).on("keypress", function() {
-  $("h1").text("Score: " + score);
-  nextSequence();
-  showSequence();
-});
+// start the game upon keypress (at any time!)
+gameStart();
+gameOver();
 
 ////////////////// FUNCTIONS //////////////////
 
-// game over effect
-function gameOver() {
+// adds the "handleClick" event listener to all buttons
+function enableButtons() {
+  $("button").on("click", handleClick);
+}
 
+// removes the "handleClick" event listener from all buttons
+function disableButtons() {
+  $("button").off("click", handleClick);
+}
+
+// starts the game
+function gameStart() {
+  // adds an event listener to the document to start the game upon keypress
+  $(document).on("keypress", function() {
+    // clears all stored data
+    gamePattern = [];
+    userClickedPattern = [];
+    score = 0;
+    gameOverFlag = 0;
+
+    // updates score header
+    $("h1").text("Score: " + score);
+
+    // begins sequence generation (buttons are enabled at the end of showSequence())
+    nextSequence();
+    showSequence();
+  });
+}
+
+// ends the game
+function gameOver() {
+  // update gameOverFlag
+  gameOverFlag = 1;
+
+  // disable buttons until new game
+  disableButtons();
+
+  // flash background red
+  $("body").addClass("game-over");
+  setTimeout(function() {
+    $("body").removeClass("game-over");
+  }, 100);
+
+  // update header to reflect end of game
+  $("h1").text("Game Over, Press Any Key to Restart");
+}
+
+
+// checks user's answer and goes to game over if it's wrong
+function checkAnswer() {
+  // compare every element of the user's pattern against the game pattern
+  for (var i = 0; i < userClickedPattern.length; ++i) {
+    if (userClickedPattern[i] !== gamePattern[i]) {
+      gameOver();
+      break;
+    }
+  }
+
+  // NOTE: Yes, this method will eventually become slower. That shouldn't happen
+  //       until very very large numbers though...
+}
+
+function handleClick() {
+  //console.log(this);
+
+  // animate the button click
+  animateButtonClick(this.id);
+
+  // add the clicked button the the user's pattern
+  userClickedPattern.push(this.id);
+
+  // check for wrong answer
+  checkAnswer();
+
+  // if user pattern length is the same as the game pattern length, reset user
+  // pattern, increment score, and generate and show the next pattern
+  if (userClickedPattern.length === gamePattern.length && !gameOverFlag) {
+    userClickedPattern = [];
+    ++score;
+    $("h1").text("Score: " + score);
+    nextSequence();
+    showSequence();
+  }
 }
 
 // generates the next sequence by pushing a new color to the end
@@ -91,15 +143,24 @@ function flash(color) {
 
 // show the current game pattern by flashing the elements with 0.5s delays
 async function showSequence() {
-  await sleep(1000);
-  // flash each element in the game pattern
-  for (var i=0; i<gamePattern.length; ++i) {
-    flash(gamePattern[i]);
-    await sleep(500);
+  if (!gameOverFlag) {
+
+    // disable buttons while pattern is being shown
+    disableButtons();
+
+    await sleep(1000);
+    // flash each element in the game pattern
+    for (var i = 0; i < gamePattern.length; ++i) {
+      flash(gamePattern[i]);
+      await sleep(500);
+    }
+
+    // re-enable buttons
+    enableButtons();
   }
 }
 
 // helper function that, when awaited, will pause execution of a function
 function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
