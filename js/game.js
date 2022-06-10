@@ -31,6 +31,13 @@ $("button").on("click", function(event) {
   }
 });
 
+// start the game upon keypress
+$(document).on("keypress", function() {
+  $("h1").text("Score: " + score);
+  nextSequence();
+  showSequence();
+});
+
 ////////////////// FUNCTIONS //////////////////
 
 // game over effect
