@@ -11,3 +11,11 @@ function nextSequence() {
   // push new color into the array
   gamePattern.push(randColor)
 }
+
+function flash(color) {
+  var sound = new Audio("sounds/" + color + ".mp3");
+  sound.volume = 0.2;
+
+  $("#" + color).fadeOut(50).fadeIn(50);
+  sound.play();
+}
