@@ -3,12 +3,12 @@ var gamePattern = [];
 var userClickedPattern = [];
 var score = 0;
 var gameOverFlag = 0;
+let masterVolume = 0.2;
 
 ////////////////// MAIN //////////////////
 
 // start the game upon keypress (at any time!)
 gameStart();
-gameOver();
 
 ////////////////// FUNCTIONS //////////////////
 
@@ -46,6 +46,10 @@ function gameOver() {
   // update gameOverFlag
   gameOverFlag = 1;
 
+  // create game over sound
+  var gameOverSound = new Audio("sounds/wrong.mp3");
+  gameOverSound.volume = masterVolume;
+
   // disable buttons until new game
   disableButtons();
 
@@ -57,6 +61,9 @@ function gameOver() {
 
   // update header to reflect end of game
   $("h1").text("Game Over, Press Any Key to Restart");
+
+  // play game over sound
+  gameOverSound.play();
 }
 
 
@@ -112,7 +119,7 @@ function nextSequence() {
 function animateButtonClick(color) {
   // create the sound that will play
   var sound = new Audio("sounds/" + color + ".mp3");
-  sound.volume = 0.2;
+  sound.volume = masterVolume;
 
   // grab the button element
   var button = $("#" + color);
@@ -131,7 +138,7 @@ function animateButtonClick(color) {
 function flash(color) {
   // create the sound that will play
   var sound = new Audio("sounds/" + color + ".mp3");
-  sound.volume = 0.2;
+  sound.volume = masterVolume;
 
   // grab the button element
   var button = $("#" + color);
